@@ -15,12 +15,9 @@ public class Compte {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @Column(name = "nom", length = 255)
     private String nom;
-    @Column(name = "tel", length = 255)
     private String tel;
-    @Column(name = "montant")
-    private float montant;
+    private double solde;
 
 
 

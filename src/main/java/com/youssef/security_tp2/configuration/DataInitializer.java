@@ -49,13 +49,13 @@ public class DataInitializer {
         Compte compte1 = new Compte();
         compte1.setNom("Youssef khalifi");
         compte1.setTel("0617478157");
-        compte1.setMontant(1452);
+        compte1.setSolde(1452);
         compteRepositoty.save(compte1);
 
         Compte compte2 = new Compte();
         compte2.setNom("ali ali");
         compte2.setTel("0617478157");
-        compte2.setMontant(1452);
+        compte2.setSolde(1452);
         compteRepositoty.save(compte2);
     }
 

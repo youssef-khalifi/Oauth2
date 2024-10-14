@@ -15,26 +15,14 @@ import io.swagger.v3.oas.annotations.servers.Server;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/v1/Comptes")
-
-
-@OpenAPIDefinition(
-        info = @Info(
-                title = "Gestion des Comptes bancaire",
-                description = " Gerer les opération de banque",
-                version = "1.0.0"
-        ),
-
-        servers = @Server(
-                url = "http://localhost:8080/"
-        )
-)
-
 @RequiredArgsConstructor
 public class CompteController {
 
@@ -42,102 +30,44 @@ public class CompteController {
     private final CompteService compteService;
 
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
-
-    @Operation(
-            summary = "Ajouter Un compte",
-            requestBody = @RequestBody(
-                    required = true,
-                    content = @Content(
-                            mediaType = "Application/json",
-                            schema = @Schema(implementation = Compte.class)
-                    )
-                ),
-            responses = {
-                    @ApiResponse(responseCode = "200",
-                            description = "ajouter par succéses",
-                            content = @Content(
-                                    mediaType = "Application/json",
-                                    schema = @Schema(implementation = Compte.class))
-                    ),
-
-                    @ApiResponse(responseCode = "400",description = "erreur données"),
-                    @ApiResponse(responseCode ="500", description = "erreur server")
-            }
-            )
-
-
-    public ResponseEntity<Compte> add(@RequestBody Compte compte){
-        Compte compte1 = compteService.CreateCompte(compte);
-        return ResponseEntity.ok(compte1);
+    public ResponseEntity<Compte> creerCompte(@RequestBody Compte compte) {
+        Compte nouveauCompte = compteService.creerCompte(compte);
+        return ResponseEntity.ok(nouveauCompte);
     }
 
 
+    @PreAuthorize("isAuthenticated()")
+    @GetMapping("/{id}/solde")
+    public ResponseEntity<Double> consulterSolde(@PathVariable Long id) {
+        Optional<Compte> compte = compteService.consulterSolde(id);
+        return compte.map(value -> ResponseEntity.ok(value.getSolde()))
+                .orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+
+    @PreAuthorize("isAuthenticated()")
+    @PostMapping("/{id}/crediter/{montant}")
+    public ResponseEntity<Compte> crediter(@PathVariable Long id, @PathVariable double montant) {
+        Compte compte = compteService.crediter(id, montant);
+        return ResponseEntity.ok(compte);
+    }
+
+
+    @PreAuthorize("isAuthenticated()")
+    @PostMapping("/{id}/debiter/{montant}")
+    public ResponseEntity<Compte> debiter(@PathVariable Long id, @PathVariable double montant) {
+        Compte compte = compteService.debiter(id, montant);
+        return ResponseEntity.ok(compte);
+    }
+
+
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping
-    @Operation(
-            summary="Recuprer Liste des Compe",
-            responses = {
-                    @ApiResponse(responseCode = "200", description = "Succès",
-                            content = @Content(
-                            mediaType = "application/json",
-                            schema = @Schema(implementation = Compte.class)
-                    )
-                    ),
-                    @ApiResponse(responseCode = "400", description = "Paramètre d'entrée non valide")
-            }  )
-    public ResponseEntity<List<Compte>> GetALL(){
-        List<Compte> compteList = compteService.GetAllCompte();
-        return ResponseEntity.ok(compteList);
+    public ResponseEntity<List<Compte>> recupererTousLesComptes() {
+        List<Compte> comptes = compteService.recupererTousLesComptes();
+        return ResponseEntity.ok(comptes);
     }
-
-
-
-    @Operation(
-            summary = "recuperer un compte par son Id",
-            parameters = @Parameter(
-                    name = "id",
-                    required = true
-            ),
-            responses = {
-                    @ApiResponse(responseCode = "200",
-                            description = "bien recuperer",
-                            content = @Content(
-                                    mediaType = "application/json",
-                                    schema = @Schema(implementation = Compte.class))
-                    ),
-                    @ApiResponse(responseCode = "404",description = "compte pas trouvé ")
-            }
-    )
-    @GetMapping("/{id}")
-    public ResponseEntity <Compte> GetbyId( @PathVariable Long id){
-        Compte compte = compteService.GetCompteById(id);
-        return compte.equals(null) ? ResponseEntity.notFound().build() : ResponseEntity.ok(compte);
-    }
-
-    @DeleteMapping("/{id}")
-    public ResponseEntity  Delete( @PathVariable Long id){
-        compteService.DeleteCompte(id);
-        return ResponseEntity.ok().build();
-    }
-
-    @PutMapping("/{id}")
-    public ResponseEntity<Compte> Update(@PathVariable Long id, @RequestBody Compte c){
-        Compte compte = compteService.UpdateCompte(id,c);
-        return ResponseEntity.ok(compte);
-    }
-
-
-    @GetMapping("/crediter/{id}/{m}")
-    public ResponseEntity<Compte> crediter(@PathVariable Long id, @PathVariable float m){
-        Compte compte = compteService.Crediter(id,m);
-        return ResponseEntity.ok(compte);
-    }
-
-    @GetMapping("/debiter/{id}/{m}")
-    public ResponseEntity<Compte> debiter(@PathVariable Long id, @PathVariable float m){
-        Compte compte = compteService.Debiter(id,m);
-        return ResponseEntity.ok(compte);
-    }
-
 
 }

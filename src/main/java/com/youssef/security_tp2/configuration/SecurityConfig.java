@@ -11,6 +11,7 @@ import com.youssef.security_tp2.service.CustomUserDetailsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -53,18 +54,31 @@ public class SecurityConfig {
 
 
     @Bean
-    public SecurityFilterChain securityFilterChain (HttpSecurity httpSecurity) throws Exception{
-
+    public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
         return httpSecurity
-                .sessionManagement(sess-> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .csrf(csrf -> csrf.disable())
-                .authorizeRequests(auth-> auth.requestMatchers("/login/**").permitAll())
-                .authorizeRequests(auth-> auth.requestMatchers("/RefreshToken/**").permitAll())
-                .authorizeRequests(auth -> auth.anyRequest().authenticated())
+                .authorizeRequests(auth -> auth
+                        .requestMatchers("/login/**").permitAll()
+                        .requestMatchers("/RefreshToken/**").permitAll()
+
+                        .requestMatchers(HttpMethod.POST, "/v1/Comptes").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/v1/Comptes").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/v1/Comptes/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/v1/Comptes/**").hasRole("ADMIN")
+
+                        .requestMatchers(HttpMethod.GET, "/v1/Comptes/{id}").authenticated()
+
+                        .requestMatchers(HttpMethod.POST, "/v1/Comptes/{id}/crediter/**").authenticated()
+                        .requestMatchers(HttpMethod.POST, "/v1/Comptes/{id}/debiter/**").authenticated()
+
+                        .requestMatchers(HttpMethod.GET, "/v1/Comptes").hasRole("ADMIN")
+
+                        .anyRequest().authenticated()
+                )
                 .oauth2ResourceServer(OAuth2ResourceServerConfigurer::jwt)
                 .httpBasic(Customizer.withDefaults())
                 .build();
-
     }
 
     // signé le token
