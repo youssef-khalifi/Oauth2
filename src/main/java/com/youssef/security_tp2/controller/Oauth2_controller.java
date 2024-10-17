@@ -52,7 +52,7 @@ public class Oauth2_controller {
                 .issuedAt(instant)
                 .expiresAt(instant.plus(2, ChronoUnit.MINUTES))
                 .claim("name",authenticate.getName())
-                .claim("SCOPE",scopes)
+                .claim("scope",scopes)
                 .build();
         // Signée le token
         String Access_Token = jwtEncoder.encode(JwtEncoderParameters.from(jwtClaimsSet_Access_token)).getTokenValue();

@@ -18,6 +18,7 @@ import org.springframework.security.authentication.dao.DaoAuthenticationProvider
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.annotation.web.configurers.oauth2.server.resource.OAuth2ResourceServerConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.User;
@@ -57,23 +58,10 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
         return httpSecurity
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .csrf(csrf -> csrf.disable())
+                .csrf(AbstractHttpConfigurer::disable)
                 .authorizeRequests(auth -> auth
                         .requestMatchers("/login/**").permitAll()
                         .requestMatchers("/RefreshToken/**").permitAll()
-
-                        .requestMatchers(HttpMethod.POST, "/v1/Comptes").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.GET, "/v1/Comptes").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.PUT, "/v1/Comptes/**").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.DELETE, "/v1/Comptes/**").hasRole("ADMIN")
-
-                        .requestMatchers(HttpMethod.GET, "/v1/Comptes/{id}").authenticated()
-
-                        .requestMatchers(HttpMethod.POST, "/v1/Comptes/{id}/crediter/**").authenticated()
-                        .requestMatchers(HttpMethod.POST, "/v1/Comptes/{id}/debiter/**").authenticated()
-
-                        .requestMatchers(HttpMethod.GET, "/v1/Comptes").hasRole("ADMIN")
-
                         .anyRequest().authenticated()
                 )
                 .oauth2ResourceServer(OAuth2ResourceServerConfigurer::jwt)

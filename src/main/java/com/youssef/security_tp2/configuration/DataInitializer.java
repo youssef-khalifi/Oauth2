@@ -1,19 +1,15 @@
 package com.youssef.security_tp2.configuration;
 
 
-import com.youssef.security_tp2.entities.Compte;
 import com.youssef.security_tp2.entities.Role;
 import com.youssef.security_tp2.entities.User;
-import com.youssef.security_tp2.repositories.CompteRepositoty;
 import com.youssef.security_tp2.repositories.UserRepository;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 
 @Service
@@ -22,7 +18,6 @@ public class DataInitializer {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-    private final CompteRepositoty compteRepositoty;
 
     @PostConstruct
     public void initialize() {
@@ -46,17 +41,7 @@ public class DataInitializer {
         user.setRoles(userRoles);
         userRepository.save(user);
 
-        Compte compte1 = new Compte();
-        compte1.setNom("Youssef khalifi");
-        compte1.setTel("0617478157");
-        compte1.setSolde(1452);
-        compteRepositoty.save(compte1);
 
-        Compte compte2 = new Compte();
-        compte2.setNom("ali ali");
-        compte2.setTel("0617478157");
-        compte2.setSolde(1452);
-        compteRepositoty.save(compte2);
     }
 
 }
